@@ -16,8 +16,9 @@
 #include "CommonIncludes.hpp"
 
 namespace uInputPlus {
-    extern std::initializer_list<int> DefaultEventTypes;
-    extern std::initializer_list<int> DefaultKeys;
+    extern const std::set<int> DefaultEventTypes;
+    extern const std::set<int> DefaultKeys;
+    extern const std::set<int> DefaultRels;
 
     class uInputDeviceInfo {
     public:
@@ -59,12 +60,13 @@ namespace uInputPlus {
     class uInputSetup {
     public:
 	uInputDeviceInfo DeviceInfo;
-	std::initializer_list<int> Events;
-	std::initializer_list<int> Keys;
+	std::set<int> Events;
+	std::set<int> Keys;
+	std::set<int> Rels;
 
 	uInputSetup() = default;
-	uInputSetup(const uInputDeviceInfo &device_info, const std::initializer_list<int> &events = DefaultEventTypes,
-		    const std::initializer_list<int> &keys = DefaultKeys);
+	uInputSetup(const uInputDeviceInfo &device_info, const std::set<int> &events = DefaultEventTypes,
+		    const std::set<int> &keys = DefaultKeys, const std::set<int> &rels = DefaultRels);
     };
 
 

@@ -13,6 +13,8 @@
 #ifndef LIBUINPUTPLUS_COMMONINCLUDES_HPP
 #define LIBUINPUTPLUS_COMMONINCLUDES_HPP
 
+#include <set>
+#include <unordered_set>
 #include <string>
 #include <exception>
 #include <system_error>

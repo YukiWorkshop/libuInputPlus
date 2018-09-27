@@ -10,6 +10,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
+#include <vector>
 #include "CommonIncludes.hpp"
 #include "uInputSetup.hpp"
 
@@ -17,6 +18,19 @@
 #define LIBUINPUTPLUS_UINPUT_HPP
 
 namespace uInputPlus {
+    class uInputRelativeMovement {
+    public:
+	int32_t X = 0, Y = 0, Z = 0;
+
+	uInputRelativeMovement() = default;
+	uInputRelativeMovement(int32_t x, int32_t y) {
+		X = x; Y = y;
+	}
+	uInputRelativeMovement(int32_t x, int32_t y, int32_t z) {
+		X = x; Y = y; Z = z;
+	}
+    };
+
     class uInput {
     private:
 
@@ -34,6 +48,12 @@ namespace uInputPlus {
 
 	void SendKey(uint16_t key_code, uint32_t value, bool report=true);
 	void SendKeyPress(const std::initializer_list<uint16_t> &keycodes, bool report=true);
+	void SendKeyPress(std::vector<std::pair<int, int>> keys, bool report=true);
+
+	void RelativeMove(const uInputRelativeMovement &movement, bool report=true);
+	void RelativeWheel(int32_t movement, bool h=false, bool report=true);
+
+	void AbsoluteWheel(int32_t movement, bool report=true);
 
     };
 }

@@ -17,7 +17,19 @@ using namespace uInputPlus;
 int main() {
 	uInput myinput({{BUS_USB, 0x1234, 0x1234, "呀"}});
 
-	sleep(1);
+	sleep(5);
 
-	myinput.SendKeyPress({KEY_2, KEY_3, KEY_3, KEY_6, KEY_6, KEY_6});
+//	myinput.SendKeyPress({KEY_2, KEY_3, KEY_3, KEY_6, KEY_6, KEY_6});
+//	myinput.SendKeyPress({{KEY_1, 1000}, {KEY_2, 600}});
+
+	int i = 600;
+
+	while (i--) {
+//		myinput.RelativeWheel(1);
+		myinput.AbsoluteWheel(1);
+		//myinput.RelativeMove({10, 10});
+		usleep(1000*16);
+	}
+
+
 }
