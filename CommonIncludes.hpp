@@ -16,10 +16,13 @@
 #include <set>
 #include <unordered_set>
 #include <string>
+#include <vector>
+#include <iostream>
 #include <exception>
 #include <system_error>
 #include <initializer_list>
 
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

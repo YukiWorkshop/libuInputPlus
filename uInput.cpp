@@ -51,6 +51,45 @@ void uInput::Init(const uInputSetup &setup) {
 		}
 	}
 
+
+//	uinput_abs_setup s1, s2, s3, s4;
+//
+//	memset(&s1, 0, sizeof(uinput_abs_setup));
+//	memset(&s2, 0, sizeof(uinput_abs_setup));
+//	memset(&s3, 0, sizeof(uinput_abs_setup));
+//	memset(&s4, 0, sizeof(uinput_abs_setup));
+//
+//	s1.code = ABS_MT_POSITION_X;
+//	s2.code = ABS_MT_POSITION_Y;
+//	s3.code = ABS_MT_SLOT;
+//	s4.code = ABS_MT_TRACKING_ID;
+//
+//	s1.absinfo.maximum = s2.absinfo.maximum = 4000;
+//	s3.absinfo.maximum = 5;
+//	s4.absinfo.maximum = 65535;
+//
+//	ioctl(FD, UI_ABS_SETUP, &s1);
+//	ioctl(FD, UI_ABS_SETUP, &s2);
+//	ioctl(FD, UI_ABS_SETUP, &s3);
+//	ioctl(FD, UI_ABS_SETUP, &s4);
+
+
+	if (setup.Events.find(EV_ABS) != setup.Events.end()) {
+
+		for (auto &it : setup.AbsSetup) {
+			if (ioctl(FD, UI_SET_ABSBIT, it.Code))
+				throw std::runtime_error("UI_SET_ABSBIT ioctl failed");
+
+			if (ioctl(FD, UI_ABS_SETUP, &(it.setup)))
+				throw std::runtime_error("UI_ABS_SETUP ioctl failed");
+		}
+	}
+
+	for (auto &it : setup.Props) {
+		if (ioctl(FD, UI_SET_PROPBIT, it))
+			throw std::runtime_error("UI_SET_PROPBIT ioctl failed");
+	}
+
 	if (ioctl(FD, UI_DEV_SETUP, &(setup.DeviceInfo.usetup)))
 		throw std::runtime_error("UI_DEV_SETUP ioctl failed");
 
@@ -75,6 +114,8 @@ void uInput::Emit(uint16_t type, uint16_t code, int32_t val) {
 	ie.value = val;
 
 	write(FD, &ie, sizeof(ie));
+
+	usleep(1000);
 }
 
 void uInput::SendKey(uint16_t key_code, uint32_t value, bool report) {
@@ -95,7 +136,7 @@ void uInput::SendKeyPress(std::vector<std::pair<int, int>> keys, bool report) {
 
 }
 
-void uInput::RelativeMove(const uInputRelativeMovement &movement, bool report) {
+void uInput::RelativeMove(const uInputCoordinate &movement, bool report) {
 	if (movement.X)
 		Emit(EV_REL, REL_X, movement.X);
 
@@ -123,4 +164,102 @@ void uInput::AbsoluteWheel(int32_t movement, bool report) {
 
 	if (report)
 		Emit(EV_SYN, SYN_REPORT, 0);
+}
+
+void uInput::AbsolutePosition(const uInputCoordinate &pos, int32_t mt_slot, bool report) {
+	if (mt_slot == -1) {
+		if (pos.X)
+			Emit(EV_ABS, ABS_X, pos.X);
+
+		if (pos.Y)
+			Emit(EV_ABS, ABS_Y, pos.Y);
+
+		if (pos.Z)
+			Emit(EV_ABS, ABS_Z, pos.Z);
+	} else {
+		Emit(EV_ABS, ABS_MT_SLOT, mt_slot);
+
+		if (pos.X)
+			Emit(EV_ABS, ABS_MT_POSITION_X, pos.X);
+
+		if (pos.Y)
+			Emit(EV_ABS, ABS_MT_POSITION_Y, pos.Y);
+
+	}
+
+	if (report)
+		Emit(EV_SYN, SYN_REPORT, 0);
+}
+
+void uInput::EmulateSmoothScroll(int offset, bool report) {
+
+	int polar = (offset / abs(offset)) * 4;
+	int32_t ypos_expected = 1000 + offset;
+
+	Emit(EV_ABS, ABS_MT_SLOT, 0);
+	Emit(EV_ABS, ABS_MT_TRACKING_ID, 2000);
+	Emit(EV_ABS, ABS_MT_POSITION_X, 1000);
+	Emit(EV_ABS, ABS_MT_POSITION_Y, 1000);
+	Emit(EV_ABS, ABS_MT_PRESSURE, 70);
+	Emit(EV_KEY, BTN_TOUCH, 1);
+	Emit(EV_ABS, ABS_X, 1000);
+	Emit(EV_ABS, ABS_Y, 1000);
+	Emit(EV_ABS, ABS_PRESSURE, 70);
+	Emit(EV_KEY, BTN_TOOL_FINGER, 1);
+	Emit(EV_SYN, SYN_REPORT, 0);
+
+	//
+	Emit(EV_ABS, ABS_MT_POSITION_X, 1000);
+	Emit(EV_ABS, ABS_MT_POSITION_Y, 1000);
+	Emit(EV_ABS, ABS_MT_PRESSURE, 70);
+	Emit(EV_ABS, ABS_MT_SLOT, 1);
+	Emit(EV_ABS, ABS_MT_TRACKING_ID, 2001);
+	Emit(EV_ABS, ABS_MT_POSITION_X, 1100);
+	Emit(EV_ABS, ABS_MT_POSITION_Y, 1000);
+	Emit(EV_ABS, ABS_MT_PRESSURE, 70);
+	Emit(EV_ABS, ABS_X, 1000);
+	Emit(EV_ABS, ABS_Y, 1000);
+	Emit(EV_ABS, ABS_PRESSURE, 70);
+	Emit(EV_KEY, BTN_TOOL_FINGER, 0);
+	Emit(EV_KEY, BTN_TOOL_DOUBLETAP, 1);
+	Emit(EV_SYN, SYN_REPORT, 0);
+
+//	Emit(EV_KEY, BTN_TOUCH, 1);
+//
+//	Emit(EV_ABS, ABS_X, 1000);
+//	Emit(EV_ABS, ABS_Y, 1000);
+//
+//	Emit(EV_KEY, BTN_TOOL_DOUBLETAP, 1);
+//
+//	Emit(EV_SYN, SYN_REPORT, 0);
+
+	int32_t ypos;
+
+	for (ypos = 1000; ypos != (ypos_expected / 4 * 4); ypos += polar) {
+		std::cout << ypos << "\n";
+		AbsolutePosition({1000, ypos}, 0, false);
+		AbsolutePosition({1000, ypos}, 1, false);
+		AbsolutePosition({1000, ypos}, -1, false);
+		Emit(EV_SYN, SYN_REPORT, 0);
+		usleep(1000*5);
+	}
+
+	Emit(EV_ABS, ABS_MT_POSITION_X, 1000);
+	Emit(EV_ABS, ABS_MT_POSITION_Y, ypos);
+	Emit(EV_ABS, ABS_MT_SLOT, 0);
+	Emit(EV_ABS, ABS_MT_TRACKING_ID, -1);
+	Emit(EV_ABS, ABS_X, 1000);
+	Emit(EV_ABS, ABS_Y, ypos);
+	Emit(EV_KEY, BTN_TOOL_FINGER, 1);
+	Emit(EV_KEY, BTN_TOOL_DOUBLETAP, 0);
+	Emit(EV_SYN, SYN_REPORT, 0);
+
+	Emit(EV_ABS, ABS_MT_SLOT, 1);
+	Emit(EV_ABS, ABS_MT_TRACKING_ID, -1);
+	Emit(EV_KEY, BTN_TOUCH, 0);
+	Emit(EV_KEY, BTN_TOOL_FINGER, 0);
+	Emit(EV_SYN, SYN_REPORT, 0);
+
+//	Emit(EV_KEY, BTN_TOOL_DOUBLETAP, 1);
+
 }

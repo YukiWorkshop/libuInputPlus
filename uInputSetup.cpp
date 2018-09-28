@@ -36,9 +36,13 @@ uInputDeviceInfo::uInputDeviceInfo(uint16_t bus_type, uint16_t vid, uint16_t pid
 }
 
 uInputSetup::uInputSetup(const uInputDeviceInfo &device_info, const std::set<int> &events,
-			 const std::set<int> &keys, const std::set<int> &rels) {
+			 const std::set<int> &keys, const std::set<int> &rels,
+			 const std::vector<uInputAbsSetup> &abs_setup, const std::set<int> &props) {
 	DeviceInfo = device_info;
 	Events = events;
 	Keys = keys;
 	Rels = rels;
+	AbsSetup = abs_setup;
+	Props = props;
+
 }

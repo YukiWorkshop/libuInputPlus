@@ -19,6 +19,61 @@ namespace uInputPlus {
     extern const std::set<int> DefaultEventTypes;
     extern const std::set<int> DefaultKeys;
     extern const std::set<int> DefaultRels;
+    extern const std::set<int> DefaultAbss;
+
+    class uInputAbsSetup {
+    public:
+	uinput_abs_setup setup{};
+
+	uint16_t &Code = setup.code;
+
+	int32_t &Value = setup.absinfo.value;
+	int32_t &Min = setup.absinfo.minimum;
+	int32_t &Max = setup.absinfo.maximum;
+	int32_t &Resoltion = setup.absinfo.resolution;
+	int32_t &Fuzz = setup.absinfo.fuzz;
+	int32_t &Flat = setup.absinfo.flat;
+
+	uInputAbsSetup() = default;
+	uInputAbsSetup(uint16_t code, int32_t max) {
+		Code = code;
+		Max = max;
+	}
+	uInputAbsSetup(uint16_t code, int32_t max, int32_t resolution) {
+		Code = code;
+		Max = max;
+		Resoltion = resolution;
+	}
+	uInputAbsSetup(uint16_t code, int32_t min, int32_t max, int32_t value, int32_t resolution, int32_t fuzz, int32_t flat) {
+		Code = code;
+		Min = min;
+		Max = max;
+		Value = value;
+		Resoltion = resolution;
+		Fuzz = fuzz;
+		Flat = flat;
+	}
+
+	friend void swap(uInputAbsSetup &first, uInputAbsSetup &second) {
+		using std::swap;
+
+		swap(first.setup, second.setup);
+	}
+
+	uInputAbsSetup(uInputAbsSetup &&other) noexcept : uInputAbsSetup() {
+		swap(*this, other);
+	}
+
+	uInputAbsSetup& operator= (uInputAbsSetup other) {
+		swap(*this, other);
+		return *this;
+	}
+
+	uInputAbsSetup(const uInputAbsSetup &other) {
+		memcpy(&setup, &(other.setup), sizeof(uinput_abs_setup));
+	}
+
+    };
 
     class uInputDeviceInfo {
     public:
@@ -63,10 +118,17 @@ namespace uInputPlus {
 	std::set<int> Events;
 	std::set<int> Keys;
 	std::set<int> Rels;
+	std::vector<uInputAbsSetup> AbsSetup;
+	std::set<int> Props;
+
 
 	uInputSetup() = default;
-	uInputSetup(const uInputDeviceInfo &device_info, const std::set<int> &events = DefaultEventTypes,
-		    const std::set<int> &keys = DefaultKeys, const std::set<int> &rels = DefaultRels);
+	uInputSetup(const uInputDeviceInfo &device_info,
+		    const std::set<int> &events = DefaultEventTypes,
+		    const std::set<int> &keys = DefaultKeys,
+		    const std::set<int> &rels = DefaultRels,
+		    const std::vector<uInputAbsSetup> &abs_setup = {},
+		    const std::set<int> &props = {});
     };
 
 
