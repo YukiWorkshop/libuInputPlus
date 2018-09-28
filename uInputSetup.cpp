@@ -28,10 +28,11 @@ std::string uInputDeviceInfo::Name() {
 	return std::string(usetup.name);
 }
 
-uInputDeviceInfo::uInputDeviceInfo(uint16_t bus_type, uint16_t vid, uint16_t pid, const std::string &name) {
+uInputDeviceInfo::uInputDeviceInfo(const std::string &name, uint16_t bus_type, uint16_t vid, uint16_t pid, uint16_t version) {
 	BusType = bus_type;
 	Vendor = vid;
 	Product = pid;
+	Version = version;
 	Name(name);
 }
 

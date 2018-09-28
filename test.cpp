@@ -17,7 +17,7 @@ using namespace uInputPlus;
 int main() {
 
 	uInputSetup mysetup(
-		{BUS_USB, 0x1234, 0x1234, "呀"},
+		{"呀"},
 		{EV_KEY, EV_ABS},
 		{BTN_LEFT, BTN_RIGHT, BTN_TOOL_FINGER, BTN_TOOL_QUINTTAP, BTN_TOUCH, BTN_TOOL_DOUBLETAP, BTN_TOOL_TRIPLETAP, BTN_TOOL_QUADTAP},
 		{},

@@ -10,11 +10,11 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#include "CommonIncludes.hpp"
-#include "uInputSetup.hpp"
-
 #ifndef LIBUINPUTPLUS_UINPUT_HPP
 #define LIBUINPUTPLUS_UINPUT_HPP
+
+#include "CommonIncludes.hpp"
+#include "uInputSetup.hpp"
 
 namespace uInputPlus {
     class uInputCoordinate {
@@ -45,17 +45,17 @@ namespace uInputPlus {
 
 	void Emit(uint16_t type, uint16_t code, int32_t val);
 
-	void SendKey(uint16_t key_code, uint32_t value, bool report=true);
-	void SendKeyPress(const std::initializer_list<uint16_t> &keycodes, bool report=true);
-	void SendKeyPress(std::vector<std::pair<int, int>> keys, bool report=true);
+	void SendKey(uint16_t key_code, uint32_t value, bool report = true);
+	void SendKeyPress(const std::initializer_list<uint16_t> &keycodes, bool report = true);
+	void SendKeyPress(std::vector<std::pair<int, int>> keys, bool report = true);
 
-	void RelativeMove(const uInputCoordinate &movement, bool report=true);
-	void RelativeWheel(int32_t movement, bool h=false, bool report=true);
+	void RelativeMove(const uInputCoordinate &movement, bool report = true);
+	void RelativeWheel(int32_t movement, bool h = false, bool report = true);
 
-	void AbsolutePosition(const uInputCoordinate &pos, int32_t mt_slot=-1, bool report=true);
-	void AbsoluteWheel(int32_t movement, bool report=true);
+	void AbsolutePosition(const uInputCoordinate &pos, int32_t mt_slot = -1, bool report = true);
+	void AbsoluteWheel(int32_t movement, bool report = true);
 
-	void EmulateSmoothScroll(int offset, bool report=true);
+	void EmulateSmoothScroll(int offset, bool report = true);
 
     };
 }

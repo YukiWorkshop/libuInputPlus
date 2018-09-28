@@ -86,7 +86,7 @@ namespace uInputPlus {
 
 
 	uInputDeviceInfo() = default;
-	uInputDeviceInfo(uint16_t bus_type, uint16_t vid, uint16_t pid, const std::string &name);
+	uInputDeviceInfo(const std::string &name, uint16_t bus_type = BUS_USB, uint16_t vid = 0x2333, uint16_t pid = 0x6666, uint16_t version = 23333);
 
 	void Name(const std::string &__name);
 	std::string Name();
