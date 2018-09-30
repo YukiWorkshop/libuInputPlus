@@ -114,8 +114,6 @@ void uInput::Emit(uint16_t type, uint16_t code, int32_t val) {
 	ie.value = val;
 
 	write(FD, &ie, sizeof(ie));
-
-	usleep(1000);
 }
 
 void uInput::SendKey(uint16_t key_code, uint32_t value, bool report) {
