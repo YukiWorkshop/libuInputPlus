@@ -43,19 +43,19 @@ namespace uInputPlus {
 	void Init(const uInputSetup &setup);
 	void Destroy();
 
-	void Emit(uint16_t type, uint16_t code, int32_t val);
+	void Emit(uint16_t type, uint16_t code, int32_t val) const;
 
-	void SendKey(uint16_t key_code, uint32_t value, bool report = true);
-	void SendKeyPress(const std::initializer_list<uint16_t> &keycodes, bool report = true);
-	void SendKeyPress(std::vector<std::pair<int, int>> keys, bool report = true);
+	void SendKey(uint16_t key_code, uint32_t value, bool report = true) const;
+	void SendKeyPress(const std::initializer_list<uint16_t> &keycodes, bool report = true) const;
+	void SendKeyPress(std::vector<std::pair<int, int>> keys, bool report = true) const;
 
-	void RelativeMove(const uInputCoordinate &movement, bool report = true);
-	void RelativeWheel(int32_t movement, bool h = false, bool report = true);
+	void RelativeMove(const uInputCoordinate &movement, bool report = true) const;
+	void RelativeWheel(int32_t movement, bool h = false, bool report = true) const;
 
-	void AbsolutePosition(const uInputCoordinate &pos, int32_t mt_slot = -1, bool report = true);
-	void AbsoluteWheel(int32_t movement, bool report = true);
+	void AbsolutePosition(const uInputCoordinate &pos, int32_t mt_slot = -1, bool report = true) const;
+	void AbsoluteWheel(int32_t movement, bool report = true) const;
 
-	void EmulateSmoothScroll(int offset, bool report = true);
+	void EmulateSmoothScroll(int offset, bool report = true) const;
 
     };
 }

@@ -106,7 +106,7 @@ void uInput::Destroy() {
 	}
 }
 
-void uInput::Emit(uint16_t type, uint16_t code, int32_t val) {
+void uInput::Emit(uint16_t type, uint16_t code, int32_t val) const {
 	input_event ie{};
 
 	ie.type = type;
@@ -116,25 +116,25 @@ void uInput::Emit(uint16_t type, uint16_t code, int32_t val) {
 	write(FD, &ie, sizeof(ie));
 }
 
-void uInput::SendKey(uint16_t key_code, uint32_t value, bool report) {
+void uInput::SendKey(uint16_t key_code, uint32_t value, bool report) const {
 	Emit(EV_KEY, key_code, value);
 
 	if (report)
 		Emit(EV_SYN, SYN_REPORT, 0);
 }
 
-void uInput::SendKeyPress(const std::initializer_list<uint16_t> &keycodes, bool report) {
+void uInput::SendKeyPress(const std::initializer_list<uint16_t> &keycodes, bool report) const {
 	for (auto it : keycodes) {
 		SendKey(it, 1, report);
 		SendKey(it, 0, report);
 	}
 }
 
-void uInput::SendKeyPress(std::vector<std::pair<int, int>> keys, bool report) {
+void uInput::SendKeyPress(std::vector<std::pair<int, int>> keys, bool report) const {
 
 }
 
-void uInput::RelativeMove(const uInputCoordinate &movement, bool report) {
+void uInput::RelativeMove(const uInputCoordinate &movement, bool report) const {
 	if (movement.X)
 		Emit(EV_REL, REL_X, movement.X);
 
@@ -150,21 +150,21 @@ void uInput::RelativeMove(const uInputCoordinate &movement, bool report) {
 
 }
 
-void uInput::RelativeWheel(int32_t movement, bool h, bool report) {
+void uInput::RelativeWheel(int32_t movement, bool h, bool report) const {
 	Emit(EV_REL, h ? REL_HWHEEL : REL_WHEEL, movement);
 
 	if (report)
 		Emit(EV_SYN, SYN_REPORT, 0);
 }
 
-void uInput::AbsoluteWheel(int32_t movement, bool report) {
+void uInput::AbsoluteWheel(int32_t movement, bool report) const {
 	Emit(EV_ABS, ABS_WHEEL, movement);
 
 	if (report)
 		Emit(EV_SYN, SYN_REPORT, 0);
 }
 
-void uInput::AbsolutePosition(const uInputCoordinate &pos, int32_t mt_slot, bool report) {
+void uInput::AbsolutePosition(const uInputCoordinate &pos, int32_t mt_slot, bool report) const {
 	if (mt_slot == -1) {
 		if (pos.X)
 			Emit(EV_ABS, ABS_X, pos.X);
@@ -189,7 +189,7 @@ void uInput::AbsolutePosition(const uInputCoordinate &pos, int32_t mt_slot, bool
 		Emit(EV_SYN, SYN_REPORT, 0);
 }
 
-void uInput::EmulateSmoothScroll(int offset, bool report) {
+void uInput::EmulateSmoothScroll(int offset, bool report) const {
 
 	int polar = (offset / abs(offset)) * 4;
 	int32_t ypos_expected = 1000 + offset;
