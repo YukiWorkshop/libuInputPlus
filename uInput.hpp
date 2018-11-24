@@ -17,6 +17,9 @@
 #include "uInputSetup.hpp"
 
 namespace uInputPlus {
+    extern const std::unordered_map<char, int> KeyTextStringTable;
+    extern const std::unordered_map<char, int> KeyTextStringTableUpper;
+
     class uInputCoordinate {
     public:
 	int32_t X = 0, Y = 0, Z = 0;

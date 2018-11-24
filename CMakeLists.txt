@@ -4,7 +4,7 @@ project(libuInputPlus)
 set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_FILES
-        uInput.cpp uInputSetup.cpp uInputSetupRes.cpp
+        uInput.cpp uInputSetup.cpp uInputResource.cpp
         uInput.hpp CommonIncludes.hpp uInputSetup.hpp)
 
 add_library(uInputPlus SHARED ${SOURCE_FILES})

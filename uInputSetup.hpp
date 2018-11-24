@@ -102,7 +102,7 @@ namespace uInputPlus {
 		swap(*this, other);
 	}
 
-	uInputDeviceInfo& operator= (uInputDeviceInfo other) {
+	uInputDeviceInfo& operator= (uInputDeviceInfo other) noexcept {
 		swap(*this, other);
 		return *this;
 	}
