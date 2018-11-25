@@ -30,4 +30,12 @@ const std::unordered_map<char, int> uInputPlus::KeyTextStringTableUpper = {
 	{'A', KEY_A}, {'B', KEY_B}, {'C', KEY_C}, {'D', KEY_D}, {'E', KEY_E}, {'F', KEY_F}, {'G', KEY_G}, {'H', KEY_H}, {'I', KEY_I}, {'J', KEY_J}, {'K', KEY_K}, {'L', KEY_L}, {'M', KEY_M}, {'N', KEY_N}, {'O', KEY_O}, {'P', KEY_P}, {'Q', KEY_Q}, {'R', KEY_R}, {'S', KEY_S}, {'T', KEY_T}, {'U', KEY_U}, {'V', KEY_V}, {'W', KEY_W}, {'X', KEY_X}, {'Y', KEY_Y}, {'Z', KEY_Z}
 };
 
-// {"F1", KEY_F1}, {"F2", KEY_F2}, {"F3", KEY_F3}, {"F4", KEY_F4}, {"F5", KEY_F5}, {"F6", KEY_F6}, {"F7", KEY_F7}, {"F8", KEY_F8}, {"F9", KEY_F9}, {"F10", KEY_F10}, {"F11", KEY_F11}, {"F12", KEY_F12},
+const std::unordered_map<std::string, int> uInputPlus::KeyStringTable = {
+	{"ALT", KEY_LEFTALT}, {"ALT_L", KEY_LEFTALT}, {"ALT_R", KEY_RIGHTALT},
+	{"SHIFT", KEY_LEFTSHIFT}, {"SHIFT_L", KEY_LEFTSHIFT}, {"SHIFT_R", KEY_RIGHTSHIFT},
+	{"CTRL", KEY_LEFTCTRL}, {"CTRL_L", KEY_LEFTCTRL}, {"CTRL_R", KEY_RIGHTCTRL},
+	{"META", KEY_LEFTMETA}, {"META_L", KEY_LEFTMETA}, {"META_R", KEY_RIGHTMETA},
+	{"TAB", KEY_TAB}, {"CAPSLOCK", KEY_CAPSLOCK}, {"NUMLOCK", KEY_NUMLOCK}, {"SCROLLLOCK", KEY_SCROLLLOCK}, {"ESC", KEY_ESC}, {"ENTER", KEY_ENTER}, {"BACKSPACE", KEY_BACKSPACE}, {"DELETE", KEY_DELETE},
+	{"INSERT", KEY_INSERT}, {"HOME", KEY_HOME}, {"END", KEY_END}, {"PAGEUP", KEY_PAGEUP}, {"PAGEDOWN", KEY_PAGEDOWN}, {"SYSRQ", KEY_SYSRQ}, {"PAUSE", KEY_PAUSE},
+	{"F1", KEY_F1}, {"F2", KEY_F2}, {"F3", KEY_F3}, {"F4", KEY_F4}, {"F5", KEY_F5}, {"F6", KEY_F6}, {"F7", KEY_F7}, {"F8", KEY_F8}, {"F9", KEY_F9}, {"F10", KEY_F10}, {"F11", KEY_F11}, {"F12", KEY_F12},
+};

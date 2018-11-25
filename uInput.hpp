@@ -19,6 +19,7 @@
 namespace uInputPlus {
     extern const std::unordered_map<char, int> KeyTextStringTable;
     extern const std::unordered_map<char, int> KeyTextStringTableUpper;
+    extern const std::unordered_map<std::string, int> KeyStringTable;
 
     class uInputCoordinate {
     public:
