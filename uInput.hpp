@@ -17,10 +17,6 @@
 #include "uInputSetup.hpp"
 
 namespace uInputPlus {
-    extern const std::unordered_map<char, int> KeyTextStringTable;
-    extern const std::unordered_map<char, int> KeyTextStringTableUpper;
-    extern const std::unordered_map<std::string, int> KeyStringTable;
-    extern const std::unordered_map<std::string, int> EventCodeStringTable;
 
     class uInputCoordinate {
     public:
