@@ -35,6 +35,7 @@ set_target_properties(uInputPlus_Static PROPERTIES OUTPUT_NAME uInputPlus)
 add_executable(uInputPlus_test test.cpp)
 target_link_libraries(uInputPlus_test uInputPlus)
 
+configure_file(uInputPlus.pc.in uInputPlus.pc @ONLY)
 install(TARGETS uInputPlus
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
@@ -42,3 +43,4 @@ install(TARGETS uInputPlus_Static
         DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES uInput.hpp uInputSetup.hpp CommonIncludes.hpp DESTINATION include/uInputPlus/)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/uInputPlus.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig/)
