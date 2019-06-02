@@ -107,13 +107,17 @@ void uInput::Destroy() {
 }
 
 void uInput::Emit(uint16_t type, uint16_t code, int32_t val) const {
-	input_event ie{};
+	if (custom_callback) {
+		int rc_ccb = custom_callback(type, code, val, custom_data);
+	} else {
+		input_event ie{};
 
-	ie.type = type;
-	ie.code = code;
-	ie.value = val;
+		ie.type = type;
+		ie.code = code;
+		ie.value = val;
 
-	write(FD, &ie, sizeof(ie));
+		write(FD, &ie, sizeof(ie));
+	}
 }
 
 void uInput::SendKey(uint16_t key_code, uint32_t value, bool report) const {
@@ -260,4 +264,9 @@ void uInput::EmulateSmoothScroll(int offset, bool report) const {
 
 //	Emit(EV_KEY, BTN_TOOL_DOUBLETAP, 1);
 
+}
+
+void uInput::Init(int (*__custom_callback)(uint16_t, uint16_t, int32_t, void *), void *__userp) {
+	custom_callback = __custom_callback;
+	custom_data = __userp;
 }

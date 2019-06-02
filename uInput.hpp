@@ -18,6 +18,12 @@
 
 namespace uInputPlus {
 
+	struct uInputRawData {
+		uint16_t type;
+		uint16_t code;
+		int32_t value;
+	} __attribute__((packed));
+
     class uInputCoordinate {
     public:
 	int32_t X = 0, Y = 0, Z = 0;
@@ -33,6 +39,9 @@ namespace uInputPlus {
 
     class uInput {
     private:
+    	int (*custom_callback)(uint16_t type, uint16_t code, int32_t val, void *userp) = nullptr;
+    	void *custom_data = nullptr;
+
 
     public:
 	uInput() = default;
@@ -42,6 +51,7 @@ namespace uInputPlus {
 	int FD = -1;
 
 	void Init(const uInputSetup &setup);
+	void Init(int (*__custom_callback)(uint16_t type, uint16_t code, int32_t val, void *userp), void *__userp);
 	void Destroy();
 
 	void Emit(uint16_t type, uint16_t code, int32_t val) const;
