@@ -1,0 +1,24 @@
+before_script:
+  - apt update
+  - apt install -y build-essential cmake git rpm
+
+build:ubuntu:18.04:
+  stage: build
+  image: ubuntu:18.04
+  script:
+    - mkdir build
+    - cd build
+    - cmake -D CMAKE_BUILD_TYPE=Debug ../
+    - make
+
+package:ubuntu:18.04:
+  stage: deploy
+  dependencies:
+    - build:ubuntu:18.04
+  script:
+    - cd build && make package
+  artifacts:
+    paths:
+      - "build/*.deb"
+      - "build/*.rpm"
+      - "build/*.xz"
