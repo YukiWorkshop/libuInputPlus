@@ -2,9 +2,9 @@ before_script:
   - apt update
   - apt install -y build-essential cmake git rpm
 
-build:ubuntu:16.04:
+build:debian:9:
   stage: build
-  image: ubuntu:16.04
+  image: debian:9
   artifacts:
     untracked: true
   script:
@@ -13,10 +13,10 @@ build:ubuntu:16.04:
     - cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS='-O1 -g' ..
     - make
 
-package:ubuntu:16.04:
+package:debian:9:
   stage: deploy
   dependencies:
-    - build:ubuntu:16.04
+    - build:debian:9
   script:
     - cd build && make package
   artifacts:
