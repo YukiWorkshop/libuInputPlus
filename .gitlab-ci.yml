@@ -1,6 +1,6 @@
 before_script:
   - apt update
-  - apt install -y build-essential cmake git rpm
+  - apt install -y build-essential cmake file git rpm
 
 build:debian:9:
   stage: build
