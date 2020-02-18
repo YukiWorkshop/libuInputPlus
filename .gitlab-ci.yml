@@ -15,6 +15,7 @@ build:debian:9:
 
 package:debian:9:
   stage: deploy
+  image: debian:9
   dependencies:
     - build:debian:9
   script:
@@ -38,6 +39,7 @@ build:ubuntu:18.04:
 
 package:ubuntu:18.04:
   stage: deploy
+  image: ubuntu:18.04
   dependencies:
     - build:ubuntu:18.04
   script:
@@ -61,8 +63,33 @@ build:ubuntu:19.04:
 
 package:ubuntu:19.04:
   stage: deploy
+  image: ubuntu:19.04
   dependencies:
     - build:ubuntu:19.04
+  script:
+    - cd build && make package
+  artifacts:
+    paths:
+      - "build/*.deb"
+      - "build/*.a"
+      - "build/*.so.*.*.*"
+
+build:ubuntu:19.10:
+  stage: build
+  image: ubuntu:19.10
+  artifacts:
+    untracked: true
+  script:
+    - mkdir build
+    - cd build
+    - cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS='-O1 -g' ..
+    - make
+
+package:ubuntu:19.10:
+  stage: deploy
+  image: ubuntu:19.10
+  dependencies:
+    - build:ubuntu:19.10
   script:
     - cd build && make package
   artifacts:
