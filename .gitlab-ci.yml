@@ -1,6 +1,6 @@
 before_script:
   - apt update
-  - apt install -y build-essential cmake file git
+  - DEBIAN_FRONTEND=noninteractive apt install -yq build-essential cmake file git
 
 build:debian:10:
   stage: build
