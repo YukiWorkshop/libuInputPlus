@@ -120,7 +120,9 @@ void uInput::emit(uint16_t type, uint16_t code, int32_t val) const {
 		ie.code = code;
 		ie.value = val;
 
-		write(fd_, &ie, sizeof(ie));
+		if (write(fd_, &ie, sizeof(ie)) != sizeof(ie)) {
+			throw std::system_error(errno, std::system_category(), "emit failed");
+		}
 	}
 }
 
