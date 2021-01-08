@@ -47,7 +47,7 @@ namespace uInputPlus {
 	public:
 		uInput() = default;
 		uInput(const uInputSetup &setup);
-		uInput(const uInputSetup &setup, std::function<int(uint16_t type, uint16_t code, int32_t val)> custom_callback);
+		uInput(std::function<void(uint16_t type, uint16_t code, int32_t val)> custom_callback);
 		~uInput();
 
 		int fd() const noexcept {
@@ -58,7 +58,7 @@ namespace uInputPlus {
 
 		void send_key(uint16_t key_code, uint32_t value, bool report = true) const;
 		void send_keypress(const std::initializer_list<uint16_t> &keycodes, bool report = true) const;
-		void send_keypress(std::vector<std::pair<int, int>> keys, bool report = true) const;
+//		void send_keypress(std::vector<std::pair<int, int>> keys, bool report = true) const;
 
 		void send_pos_relative(const uInputCoordinate &movement, bool report = true) const;
 		void send_pos_absolute(const uInputCoordinate &pos, int32_t mt_slot = -1, bool report = true) const;

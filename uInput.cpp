@@ -21,8 +21,7 @@ uInput::uInput(const uInputSetup &setup) {
 	__init(setup);
 }
 
-uInput::uInput(const uInputSetup &setup, std::function<int(uint16_t, uint16_t, int32_t)> custom_callback) {
-	__init(setup);
+uInput::uInput(std::function<void(uint16_t, uint16_t, int32_t)> custom_callback) {
 	custom_callback_ = std::move(custom_callback);
 }
 
@@ -140,9 +139,9 @@ void uInput::send_keypress(const std::initializer_list<uint16_t> &keycodes, bool
 	}
 }
 
-void uInput::send_keypress(std::vector<std::pair<int, int>> keys, bool report) const {
-
-}
+//void uInput::send_keypress(std::vector<std::pair<int, int>> keys, bool report) const {
+//
+//}
 
 void uInput::send_pos_relative(const uInputCoordinate &movement, bool report) const {
 	if (movement.X)
