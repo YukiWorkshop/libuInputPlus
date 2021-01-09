@@ -1,6 +1,6 @@
 /*
     This file is part of libuInputPlus.
-    Copyright (C) 2018 YukiWorkshop
+    Copyright (C) 2018-2021 Reimu NotMoe <reimu@sudomaker.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the MIT License.
@@ -17,37 +17,40 @@
 
 using namespace uInputPlus;
 
-
 uInput::uInput(const uInputSetup &setup) {
-	Init(setup);
+	__init(setup);
+}
+
+uInput::uInput(std::function<void(uint16_t, uint16_t, int32_t)> custom_callback) {
+	custom_callback_ = std::move(custom_callback);
 }
 
 uInput::~uInput() {
-	Destroy();
+	__deinit();
 }
 
-void uInput::Init(const uInputSetup &setup) {
-	FD = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
+void uInput::__init(const uInputSetup &setup) {
+	fd_ = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
 
-	if (FD < 0)
-		throw std::runtime_error("failed to open uinput device");
+	if (fd_ < 0)
+		throw std::system_error(errno, std::system_category(), "failed to open uinput device");
 
 	for (auto it : setup.Events) {
-		if (ioctl(FD, UI_SET_EVBIT, it))
-			throw std::runtime_error("UI_SET_EVBIT ioctl failed");
+		if (ioctl(fd_, UI_SET_EVBIT, it))
+			throw std::system_error(errno, std::system_category(), "UI_SET_EVBIT ioctl failed");
 	}
 
 	if (setup.Events.find(EV_KEY) != setup.Events.end()) {
 		for (auto it : setup.Keys) {
-			if (ioctl(FD, UI_SET_KEYBIT, it))
-				throw std::runtime_error("UI_SET_EVBIT ioctl failed");
+			if (ioctl(fd_, UI_SET_KEYBIT, it))
+				throw std::system_error(errno, std::system_category(), "UI_SET_EVBIT ioctl failed");
 		}
 	}
 
 	if (setup.Events.find(EV_REL) != setup.Events.end()) {
 		for (auto it : setup.Rels) {
-			if (ioctl(FD, UI_SET_RELBIT, it))
-				throw std::runtime_error("UI_SET_RELBIT ioctl failed");
+			if (ioctl(fd_, UI_SET_RELBIT, it))
+				throw std::system_error(errno, std::system_category(), "UI_SET_RELBIT ioctl failed");
 		}
 	}
 
@@ -77,38 +80,38 @@ void uInput::Init(const uInputSetup &setup) {
 	if (setup.Events.find(EV_ABS) != setup.Events.end()) {
 
 		for (auto &it : setup.AbsSetup) {
-			if (ioctl(FD, UI_SET_ABSBIT, it.Code))
-				throw std::runtime_error("UI_SET_ABSBIT ioctl failed");
+			if (ioctl(fd_, UI_SET_ABSBIT, it.Code))
+				throw std::system_error(errno, std::system_category(), "UI_SET_ABSBIT ioctl failed");
 
-			if (ioctl(FD, UI_ABS_SETUP, &(it.setup)))
-				throw std::runtime_error("UI_ABS_SETUP ioctl failed");
+			if (ioctl(fd_, UI_ABS_SETUP, &(it.setup)))
+				throw std::system_error(errno, std::system_category(), "UI_ABS_SETUP ioctl failed");
 		}
 	}
 
 	for (auto &it : setup.Props) {
-		if (ioctl(FD, UI_SET_PROPBIT, it))
-			throw std::runtime_error("UI_SET_PROPBIT ioctl failed");
+		if (ioctl(fd_, UI_SET_PROPBIT, it))
+			throw std::system_error(errno, std::system_category(), "UI_SET_PROPBIT ioctl failed");
 	}
 
-	if (ioctl(FD, UI_DEV_SETUP, &(setup.DeviceInfo.usetup)))
-		throw std::runtime_error("UI_DEV_SETUP ioctl failed");
+	if (ioctl(fd_, UI_DEV_SETUP, &(setup.DeviceInfo.usetup)))
+		throw std::system_error(errno, std::system_category(), "UI_DEV_SETUP ioctl failed");
 
-	if (ioctl(FD, UI_DEV_CREATE))
-		throw std::runtime_error("UI_DEV_CREATE ioctl failed");
+	if (ioctl(fd_, UI_DEV_CREATE))
+		throw std::system_error(errno, std::system_category(), "UI_DEV_CREATE ioctl failed");
 
 }
 
-void uInput::Destroy() {
-	if (FD > 0) {
-		ioctl(FD, UI_DEV_DESTROY);
-		close(FD);
-		FD = -1;
+void uInput::__deinit() {
+	if (fd_ > 0) {
+		ioctl(fd_, UI_DEV_DESTROY);
+		close(fd_);
+		fd_ = -1;
 	}
 }
 
-void uInput::Emit(uint16_t type, uint16_t code, int32_t val) const {
-	if (custom_callback) {
-		int rc_ccb = custom_callback(type, code, val, custom_data);
+void uInput::emit(uint16_t type, uint16_t code, int32_t val) const {
+	if (custom_callback_) {
+		custom_callback_(type, code, val);
 	} else {
 		input_event ie{};
 
@@ -116,115 +119,117 @@ void uInput::Emit(uint16_t type, uint16_t code, int32_t val) const {
 		ie.code = code;
 		ie.value = val;
 
-		write(FD, &ie, sizeof(ie));
+		if (write(fd_, &ie, sizeof(ie)) != sizeof(ie)) {
+			throw std::system_error(errno, std::system_category(), "emit failed");
+		}
 	}
 }
 
-void uInput::SendKey(uint16_t key_code, uint32_t value, bool report) const {
-	Emit(EV_KEY, key_code, value);
+void uInput::send_key(uint16_t key_code, uint32_t value, bool report) const {
+	emit(EV_KEY, key_code, value);
 
 	if (report)
-		Emit(EV_SYN, SYN_REPORT, 0);
+		emit(EV_SYN, SYN_REPORT, 0);
 }
 
-void uInput::SendKeyPress(const std::initializer_list<uint16_t> &keycodes, bool report) const {
+void uInput::send_keypress(const std::initializer_list<uint16_t> &keycodes, bool report) const {
 	for (auto it : keycodes) {
-		SendKey(it, 1, report);
-		SendKey(it, 0, report);
+		send_key(it, 1, report);
+		send_key(it, 0, report);
 	}
 }
 
-void uInput::SendKeyPress(std::vector<std::pair<int, int>> keys, bool report) const {
+//void uInput::send_keypress(std::vector<std::pair<int, int>> keys, bool report) const {
+//
+//}
 
-}
-
-void uInput::RelativeMove(const uInputCoordinate &movement, bool report) const {
+void uInput::send_pos_relative(const uInputCoordinate &movement, bool report) const {
 	if (movement.X)
-		Emit(EV_REL, REL_X, movement.X);
+		emit(EV_REL, REL_X, movement.X);
 
 	if (movement.Y)
-		Emit(EV_REL, REL_Y, movement.Y);
+		emit(EV_REL, REL_Y, movement.Y);
 
 	if (movement.Z)
-		Emit(EV_REL, REL_Z, movement.Z);
+		emit(EV_REL, REL_Z, movement.Z);
 
 
 	if (report)
-		Emit(EV_SYN, SYN_REPORT, 0);
+		emit(EV_SYN, SYN_REPORT, 0);
 
 }
 
-void uInput::RelativeWheel(int32_t movement, bool h, bool report) const {
-	Emit(EV_REL, h ? REL_HWHEEL : REL_WHEEL, movement);
+void uInput::send_wheel_relative(int32_t movement, bool h, bool report) const {
+	emit(EV_REL, h ? REL_HWHEEL : REL_WHEEL, movement);
 
 	if (report)
-		Emit(EV_SYN, SYN_REPORT, 0);
+		emit(EV_SYN, SYN_REPORT, 0);
 }
 
-void uInput::AbsoluteWheel(int32_t movement, bool report) const {
-	Emit(EV_ABS, ABS_WHEEL, movement);
+void uInput::send_wheel_absolute(int32_t movement, bool report) const {
+	emit(EV_ABS, ABS_WHEEL, movement);
 
 	if (report)
-		Emit(EV_SYN, SYN_REPORT, 0);
+		emit(EV_SYN, SYN_REPORT, 0);
 }
 
-void uInput::AbsolutePosition(const uInputCoordinate &pos, int32_t mt_slot, bool report) const {
+void uInput::send_pos_absolute(const uInputCoordinate &pos, int32_t mt_slot, bool report) const {
 	if (mt_slot == -1) {
 		if (pos.X)
-			Emit(EV_ABS, ABS_X, pos.X);
+			emit(EV_ABS, ABS_X, pos.X);
 
 		if (pos.Y)
-			Emit(EV_ABS, ABS_Y, pos.Y);
+			emit(EV_ABS, ABS_Y, pos.Y);
 
 		if (pos.Z)
-			Emit(EV_ABS, ABS_Z, pos.Z);
+			emit(EV_ABS, ABS_Z, pos.Z);
 	} else {
-		Emit(EV_ABS, ABS_MT_SLOT, mt_slot);
+		emit(EV_ABS, ABS_MT_SLOT, mt_slot);
 
 		if (pos.X)
-			Emit(EV_ABS, ABS_MT_POSITION_X, pos.X);
+			emit(EV_ABS, ABS_MT_POSITION_X, pos.X);
 
 		if (pos.Y)
-			Emit(EV_ABS, ABS_MT_POSITION_Y, pos.Y);
+			emit(EV_ABS, ABS_MT_POSITION_Y, pos.Y);
 
 	}
 
 	if (report)
-		Emit(EV_SYN, SYN_REPORT, 0);
+		emit(EV_SYN, SYN_REPORT, 0);
 }
 
-void uInput::EmulateSmoothScroll(int offset, bool report) const {
+void uInput::emulate_touchpad_scroll(int offset, bool report) const {
 
 	int polar = (offset / abs(offset)) * 4;
 	int32_t ypos_expected = 1000 + offset;
 
-	Emit(EV_ABS, ABS_MT_SLOT, 0);
-	Emit(EV_ABS, ABS_MT_TRACKING_ID, 2000);
-	Emit(EV_ABS, ABS_MT_POSITION_X, 1000);
-	Emit(EV_ABS, ABS_MT_POSITION_Y, 1000);
-	Emit(EV_ABS, ABS_MT_PRESSURE, 70);
-	Emit(EV_KEY, BTN_TOUCH, 1);
-	Emit(EV_ABS, ABS_X, 1000);
-	Emit(EV_ABS, ABS_Y, 1000);
-	Emit(EV_ABS, ABS_PRESSURE, 70);
-	Emit(EV_KEY, BTN_TOOL_FINGER, 1);
-	Emit(EV_SYN, SYN_REPORT, 0);
+	emit(EV_ABS, ABS_MT_SLOT, 0);
+	emit(EV_ABS, ABS_MT_TRACKING_ID, 2000);
+	emit(EV_ABS, ABS_MT_POSITION_X, 1000);
+	emit(EV_ABS, ABS_MT_POSITION_Y, 1000);
+	emit(EV_ABS, ABS_MT_PRESSURE, 70);
+	emit(EV_KEY, BTN_TOUCH, 1);
+	emit(EV_ABS, ABS_X, 1000);
+	emit(EV_ABS, ABS_Y, 1000);
+	emit(EV_ABS, ABS_PRESSURE, 70);
+	emit(EV_KEY, BTN_TOOL_FINGER, 1);
+	emit(EV_SYN, SYN_REPORT, 0);
 
 	//
-	Emit(EV_ABS, ABS_MT_POSITION_X, 1000);
-	Emit(EV_ABS, ABS_MT_POSITION_Y, 1000);
-	Emit(EV_ABS, ABS_MT_PRESSURE, 70);
-	Emit(EV_ABS, ABS_MT_SLOT, 1);
-	Emit(EV_ABS, ABS_MT_TRACKING_ID, 2001);
-	Emit(EV_ABS, ABS_MT_POSITION_X, 1100);
-	Emit(EV_ABS, ABS_MT_POSITION_Y, 1000);
-	Emit(EV_ABS, ABS_MT_PRESSURE, 70);
-	Emit(EV_ABS, ABS_X, 1000);
-	Emit(EV_ABS, ABS_Y, 1000);
-	Emit(EV_ABS, ABS_PRESSURE, 70);
-	Emit(EV_KEY, BTN_TOOL_FINGER, 0);
-	Emit(EV_KEY, BTN_TOOL_DOUBLETAP, 1);
-	Emit(EV_SYN, SYN_REPORT, 0);
+	emit(EV_ABS, ABS_MT_POSITION_X, 1000);
+	emit(EV_ABS, ABS_MT_POSITION_Y, 1000);
+	emit(EV_ABS, ABS_MT_PRESSURE, 70);
+	emit(EV_ABS, ABS_MT_SLOT, 1);
+	emit(EV_ABS, ABS_MT_TRACKING_ID, 2001);
+	emit(EV_ABS, ABS_MT_POSITION_X, 1100);
+	emit(EV_ABS, ABS_MT_POSITION_Y, 1000);
+	emit(EV_ABS, ABS_MT_PRESSURE, 70);
+	emit(EV_ABS, ABS_X, 1000);
+	emit(EV_ABS, ABS_Y, 1000);
+	emit(EV_ABS, ABS_PRESSURE, 70);
+	emit(EV_KEY, BTN_TOOL_FINGER, 0);
+	emit(EV_KEY, BTN_TOOL_DOUBLETAP, 1);
+	emit(EV_SYN, SYN_REPORT, 0);
 
 //	Emit(EV_KEY, BTN_TOUCH, 1);
 //
@@ -239,34 +244,31 @@ void uInput::EmulateSmoothScroll(int offset, bool report) const {
 
 	for (ypos = 1000; ypos != (ypos_expected / 4 * 4); ypos += polar) {
 		std::cout << ypos << "\n";
-		AbsolutePosition({1000, ypos}, 0, false);
-		AbsolutePosition({1000, ypos}, 1, false);
-		AbsolutePosition({1000, ypos}, -1, false);
-		Emit(EV_SYN, SYN_REPORT, 0);
+		send_pos_absolute({1000, ypos}, 0, false);
+		send_pos_absolute({1000, ypos}, 1, false);
+		send_pos_absolute({1000, ypos}, -1, false);
+		emit(EV_SYN, SYN_REPORT, 0);
 		usleep(1000*5);
 	}
 
-	Emit(EV_ABS, ABS_MT_POSITION_X, 1000);
-	Emit(EV_ABS, ABS_MT_POSITION_Y, ypos);
-	Emit(EV_ABS, ABS_MT_SLOT, 0);
-	Emit(EV_ABS, ABS_MT_TRACKING_ID, -1);
-	Emit(EV_ABS, ABS_X, 1000);
-	Emit(EV_ABS, ABS_Y, ypos);
-	Emit(EV_KEY, BTN_TOOL_FINGER, 1);
-	Emit(EV_KEY, BTN_TOOL_DOUBLETAP, 0);
-	Emit(EV_SYN, SYN_REPORT, 0);
+	emit(EV_ABS, ABS_MT_POSITION_X, 1000);
+	emit(EV_ABS, ABS_MT_POSITION_Y, ypos);
+	emit(EV_ABS, ABS_MT_SLOT, 0);
+	emit(EV_ABS, ABS_MT_TRACKING_ID, -1);
+	emit(EV_ABS, ABS_X, 1000);
+	emit(EV_ABS, ABS_Y, ypos);
+	emit(EV_KEY, BTN_TOOL_FINGER, 1);
+	emit(EV_KEY, BTN_TOOL_DOUBLETAP, 0);
+	emit(EV_SYN, SYN_REPORT, 0);
 
-	Emit(EV_ABS, ABS_MT_SLOT, 1);
-	Emit(EV_ABS, ABS_MT_TRACKING_ID, -1);
-	Emit(EV_KEY, BTN_TOUCH, 0);
-	Emit(EV_KEY, BTN_TOOL_FINGER, 0);
-	Emit(EV_SYN, SYN_REPORT, 0);
+	emit(EV_ABS, ABS_MT_SLOT, 1);
+	emit(EV_ABS, ABS_MT_TRACKING_ID, -1);
+	emit(EV_KEY, BTN_TOUCH, 0);
+	emit(EV_KEY, BTN_TOOL_FINGER, 0);
+	emit(EV_SYN, SYN_REPORT, 0);
 
 //	Emit(EV_KEY, BTN_TOOL_DOUBLETAP, 1);
 
 }
 
-void uInput::Init(int (*__custom_callback)(uint16_t, uint16_t, int32_t, void *), void *__userp) {
-	custom_callback = __custom_callback;
-	custom_data = __userp;
-}
+

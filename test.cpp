@@ -1,6 +1,6 @@
 /*
     This file is part of libuInputPlus.
-    Copyright (C) 2018 YukiWorkshop
+    Copyright (C) 2018-2021 Reimu NotMoe <reimu@sudomaker.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the MIT License.
@@ -10,7 +10,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#include "uInput.hpp"
+#include <uInput.hpp>
 
 using namespace uInputPlus;
 
@@ -43,7 +43,7 @@ int main() {
 //	myinput.SendKeyPress({{KEY_1, 1000}, {KEY_2, 600}});
 
 
-	myinput.EmulateSmoothScroll(-4000);
+	myinput.emulate_touchpad_scroll(-4000);
 //	int i = 600;
 //
 //	while (i--) {

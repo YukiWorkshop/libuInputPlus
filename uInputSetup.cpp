@@ -1,6 +1,6 @@
 /*
     This file is part of libuInputPlus.
-    Copyright (C) 2018 YukiWorkshop
+    Copyright (C) 2018-2021 Reimu NotMoe <reimu@sudomaker.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the MIT License.
@@ -15,7 +15,7 @@
 using namespace uInputPlus;
 
 
-void uInputDeviceInfo::Name(const std::string &__name) {
+void uInputDeviceInfo::set_name(const std::string &__name) {
 	auto len = __name.size();
 	if (len > (UINPUT_MAX_NAME_SIZE-1))
 		len = (UINPUT_MAX_NAME_SIZE-1);
@@ -24,7 +24,7 @@ void uInputDeviceInfo::Name(const std::string &__name) {
 	usetup.name[len] = 0;
 }
 
-std::string uInputDeviceInfo::Name() {
+std::string uInputDeviceInfo::name() {
 	return std::string(usetup.name);
 }
 
@@ -33,7 +33,7 @@ uInputDeviceInfo::uInputDeviceInfo(const std::string &name, uint16_t bus_type, u
 	Vendor = vid;
 	Product = pid;
 	Version = version;
-	Name(name);
+	set_name(name);
 }
 
 uInputSetup::uInputSetup(const uInputDeviceInfo &device_info, const std::set<int> &events,

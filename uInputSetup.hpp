@@ -1,6 +1,6 @@
 /*
     This file is part of libuInputPlus.
-    Copyright (C) 2018 YukiWorkshop
+    Copyright (C) 2018-2021 Reimu NotMoe <reimu@sudomaker.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the MIT License.
@@ -10,8 +10,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#ifndef LIBUINPUTPLUS_UINPUTSETUP_HPP
-#define LIBUINPUTPLUS_UINPUTSETUP_HPP
+#pragma once
 
 #include "CommonIncludes.hpp"
 
@@ -88,8 +87,8 @@ namespace uInputPlus {
 	uInputDeviceInfo() = default;
 	uInputDeviceInfo(const std::string &name, uint16_t bus_type = BUS_USB, uint16_t vid = 0x2333, uint16_t pid = 0x6666, uint16_t version = 23333);
 
-	void Name(const std::string &__name);
-	std::string Name();
+	void set_name(const std::string &__name);
+	std::string name();
 
 
 	friend void swap(uInputDeviceInfo &first, uInputDeviceInfo &second) {
@@ -133,5 +132,3 @@ namespace uInputPlus {
 
 
 }
-
-#endif //LIBUINPUTPLUS_UINPUTSETUP_HPP
